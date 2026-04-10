@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: #1a1008;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 620px;
+  font-family: sans-serif;
+  user-select: none;
+}
+.scene {
+  width: 600px; height: 520px;
+  perspective: 1100px;
+  display: flex; align-items: center; justify-content: center;
+}
+.box {
+  width: 264px; height: 360px;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(-15deg) rotateY(30deg);
+  animation: spin 22s linear infinite;
+}
+.face {
+  position: absolute;
+  backface-visibility: hidden;
+  overflow: hidden;
+}
+.face img {
+  width: 100%; height: 100%;
+  object-fit: fill;
+  display: block;
+  pointer-events: none;
+}
+
+/* W=264, H=360, D=240 */
+.front { width:264px; height:360px; left:0; top:0; transform: translateZ(120px); }
+.back  { width:264px; height:360px; left:0; top:0; transform: rotateY(180deg) translateZ(120px); }
+.left  { width:240px; height:360px; left:12px; top:0; transform: rotateY(-90deg) translateZ(132px); }
+.right { width:240px; height:360px; left:12px; top:0; transform: rotateY(90deg) translateZ(132px); }
+.top   { width:264px; height:240px; left:0; top:60px; transform: rotateX(90deg) translateZ(180px); }
+.bottom{ width:264px; height:240px; left:0; top:60px; transform: rotateX(-90deg) translateZ(180px); }
+
+.controls { display:flex; gap:12px; margin-top:20px; }
+.ctrl-btn {
+  background: rgba(255,255,255,0.08);
+  border: 0.5px solid rgba(232,240,0,0.4);
+  color: #e8f000; font-size:12px;
+  padding:6px 20px; border-radius:20px; cursor:pointer;
+}
+.ctrl-btn:hover { background: rgba(232,240,0,0.12); }
+.hint { font-size:11px; color:rgba(255,255,255,0.3); margin-top:8px; }
+
+@keyframes spin {
+  from { transform: rotateX(-15deg) rotateY(0deg); }
+  to   { transform: rotateX(-15deg) rotateY(360deg); }
+}
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="box" id="box">
+    <div class="face front"><img src="fronte_11x15.png" alt="fronte"/></div>
+    <div class="face back"><img src="retro_11x15__2_.png" alt="retro"/></div>
+    <div class="face left"><img src="laterale_10x15.png" alt="laterale sx"/></div>
+    <div class="face right"><img src="laterale_10x15__2_.png" alt="laterale dx"/></div>
+    <div class="face top"><img src="superiore_11x10.png" alt="superiore"/></div>
+    <div class="face bottom"><img src="fondo_11x10.png" alt="fondo"/></div>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="ctrl-btn" onclick="toggleSpin()">⏸ Pausa / ▶ Ruota</button>
+</div>
+<div class="hint">Trascina per ruotare manualmente</div>
+
+<script>
+let paused = false;
+function toggleSpin() {
+  paused = !paused;
+  box.style.animationPlayState = paused ? 'paused' : 'running';
+}
+
+const box = document.getElementById('box');
+let dragging = false, lastX = 0, lastY = 0;
+let rotX = -15, rotY = 30;
+
+box.addEventListener('mousedown', e => {
+  dragging = true; lastX = e.clientX; lastY = e.clientY;
+  box.style.animation = 'none'; paused = true; e.preventDefault();
+});
+document.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  rotY += (e.clientX - lastX) * 0.6;
+  rotX -= (e.clientY - lastY) * 0.3;
+  rotX = Math.max(-50, Math.min(50, rotX));
+  box.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+  lastX = e.clientX; lastY = e.clientY;
+});
+document.addEventListener('mouseup', () => { dragging = false; });
+
+box.addEventListener('touchstart', e => {
+  dragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+  box.style.animation = 'none'; paused = true;
+}, {passive:true});
+document.addEventListener('touchmove', e => {
+  if (!dragging) return;
+  rotY += (e.touches[0].clientX - lastX) * 0.6;
+  rotX -= (e.touches[0].clientY - lastY) * 0.3;
+  rotX = Math.max(-50, Math.min(50, rotX));
+  box.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+  lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+}, {passive:true});
+document.addEventListener('touchend', () => { dragging = false; });
+</script>
+</body>
+</html>
